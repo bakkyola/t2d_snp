@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<link rel="icon" sizes="180x180" href="{{ url_for('static', filename='logo.png') }}">
+<head>
+    <link rel="icon" sizes="180x180" href="{{ url_for('static', filename='logo.png') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search SNPs</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+</head>
+  
+          <!-- Accessibility Controls -->
+    <div class="accessibility-controls">
+      <button id="darkModeBtn">🌙</button>
+      <button onclick="increaseFont()">A+</button>
+      <button onclick="decreaseFont()">A-</button>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-info">
+      <div class="container">
+          <!-- Logo -->
+          <a class="navbar-brand" href="#">
+              <!-- <img src="{{ url_for('static', filename='logo (15).png') }}" alt="T2D Jammy Jellyfish Logo" class="nav-logo"> -->
+              <!-- <img src="{{ url_for('static', filename='static/logo (15).png') }}" alt="T2D Jammy Jellyfish Logo" class="nav-logo"> -->
+              <!-- <img src="{{ url_for('static', filename='logo (15).png') }}" alt="T2D Jammy Jellyfish Logo" class="nav-logo"> -->
+              <img src="{{ url_for('static', filename='logo.png') }}" alt="T2D Jammy Jellyfish Logo" class="nav-logo">
+
+
+              <!-- <img src="logo.png" alt="T2D Jammy Jellyfish Logo" class="nav-logo"> -->
+              <span class="brand-text">T2D SNP ATLAS</span>
+          </a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+              <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+              <ul class="navbar-nav ml-auto">
+                  <li class="nav-item"><a class="nav-link" href="/">Home</span></a></li>
+                  <li class="nav-item active"><a class="nav-link" href="/query">Query <span class="sr-only">(current)</a></li>
+                  <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
+              </ul>
+          </div>
+      </div>
+  </nav>
+      <br><br>
+      <!-- Allow user to enter information here -->
+      <div class="container-fluid full-height">
+        <h1>Search SNPs</h1>
+        <div class="box">
+          Please enter any known information on the SNP of interest
+          <br><br>
+        </div>
+        <form action="/query" method="post">
+          <div>
+              <label for="query">Enter SNP rs-value:</label>
+              <input type="text" id="query1" name="query1" value="{{request.form.get('query1','')}}">
+          </div>
+          <div>
+              <label for="query">Enter genomic postion/coordinate:</label>
+              <input type="text" id="query2" name="query2"value="{{request.form.get('query2','')}}">
+          </div>
+          <div>
+              <label for="query">Enter mapped gene name:</label>
+              <input type="text" id="query3" name="query3"value="{{request.form.get('query3','')}}">
+          </div>
+          <div>
+            <label for="query">Choose Population: </label>
+            <input type="text" id="query4" list="populations" name="query4"value="{{request.form.get('query4','')}}">
+            <datalist id="populations">
+              <option value="South Asian">
+              <option value="European">
+              <option value="African">
+              <option value="Hispanic">
+              <option value="East Asian">
+              <option value="Oceanian">
+              <option value="Mixed">
+            </datalist>
+          </div>
+          <div>
+              <button type="submit">Search</button>
+          </div>
+          <br><br>
+          <form method="POST">
+        </form>
+        <style>
+          .container-fluid {
+            margin-top: 20px;
+            width: 100%;
+          }
+        </style>
+          <div class="container-fluid">
+          <!-- Allow user to see results -->
+          <h1>Search Results</h1> 
+          <p><strong>Click</strong> on SNP of interest to view <strong> Positive Selection Summary Statistics</strong> in South Asian Populations</p>
+            {% if snps %} 
+            <table id="snp-table" class="table table-striped">
+              <thead class="thead-dark">
+                <tr>
+                  <th scope="col" col-index = 1>SNP RS-Value</th>
+                  <th scope="col" col-index = 2>Chromosome</th>
+                  <th scope="col" col-index = 3>Genomic Position/Coordinate</th>
+                  <th scope="col" col-index = 4>Mapped Gene Name</th>
+                  <th scope="col" col-index = 5>Risk Allele Frequency Mean &#177; Std</th>
+                  <th scope="col" col-index = 6>P Value</th>
+                  <th scope="col" col-index = 7>Phenotype</th>
+                  <th scope="col" col-index = 8>Population</th>
+                </tr>
+              </thead>
+              <tbody> {% for snp, snp_stat in snps %} <tr>
+                  <td>
+                    <a href="/query/visualisation/{{ snp.rs_value }}" target="_blank" >
+                      {{ snp.rs_value }}
+                    </a>
+                    
+                  </td>
+                  <td>{{snp.chr_id}}</td>
+                  <td>{{ snp.gene_pos }}</td>
+                  <td>
+                    <a href="/query/ontology/{{ snp.mapped_gene }}" target="_blank">
+                      {{ snp.mapped_gene }}
+                    </a></td>
+                  <td>
+                    {% if snp_stat and snp_stat.risk_mean is not none %}
+                        {{ snp_stat.risk_mean|round(3) }} &#177; {{ snp_stat.risk_std|round(3) }}
+                    {% else %}
+                        <em>No stats available</em>
+                    {% endif %}
+                  <td>{{ snp.snp_p_value }}</td>
+                  <td>{{ snp.snp_phenotype }}</td>
+                  <td>{{ snp.snp_population }}</td>
+                </tr> {% endfor %} </tbody>
+            </table> {% else %} <p>No results found.</p> {% endif %}
+          </div>
+        </form>
+      
+      </div>
+      <!-- JavaScript code -->
+      <script>
+        let fontSize = 16;
+        const body = document.querySelector('body');
+        
+        function increaseFont() {
+            fontSize += 2;
+            body.style.fontSize = fontSize + 'px';
+        }
+
+        function decreaseFont() {
+            fontSize -= 2;
+            body.style.fontSize = fontSize + 'px';
+        }
+
+        document.getElementById('darkModeBtn').addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                this.textContent = "🌞";
+            } else {
+                this.textContent = "🌙";
+            }
+        });
+    </script>
+
+  <!-- Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js"></script>
+</body>
+</html>
